@@ -5,6 +5,7 @@ import { Section } from "./components/Section/Section";
 import { Users } from "./components/Users/Users";
 import { Button } from "./components/Button/Button";
 import { AddUserForm } from "./components/AddUserForm/AddUserForm";
+// import AddUserForm from "./components/AddUserForm/AddUserForm";
 
 class App extends Component {
   // constructor() {
@@ -18,6 +19,7 @@ class App extends Component {
     users: data,
     isListShown: false,
     isFormShown: false,
+    userToUpdate: null,
   };
 
   showUsers = () => {
@@ -50,15 +52,36 @@ class App extends Component {
     }));
   };
 
+  updateUser = (user) => {
+    this.setState((prevState) => {
+      const index = prevState.users.findIndex(({ id }) => id === user.id);
+      const newUsers = [...prevState.users];
+      newUsers[index] = user;
+      return { users: newUsers, userToUpdate: null };
+    });
+  };
+
+  showUpdateForm = (userId) => {
+    const { users } = this.state;
+    const userToUpdate = users.find(({ id }) => id === userId);
+    this.setState({ userToUpdate });
+  };
+
   render() {
-    const { isListShown, users, isFormShown } = this.state;
+    const { isListShown, users, isFormShown, userToUpdate } = this.state;
     return (
       <>
         {isListShown ? (
           <Section title="List of users">
-            <Users users={users} deleteUser={this.deleteUser} />
+            <Users
+              users={users}
+              deleteUser={this.deleteUser}
+              updateUser={this.updateUser}
+              userToUpdate={userToUpdate}
+              showUpdateForm={this.showUpdateForm}
+            />
             {isFormShown ? (
-              <AddUserForm addUser={this.addUser} closeForm={this.closeForm}/>
+              <AddUserForm addUser={this.addUser} closeForm={this.closeForm} />
             ) : (
               <Button
                 textContent="Add user"
