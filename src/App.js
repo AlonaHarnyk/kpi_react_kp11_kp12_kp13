@@ -1,101 +1,54 @@
 import { Component } from "react";
-
-import { data } from "./data/data";
-import { Section } from "./components/Section/Section";
-import { Users } from "./components/Users/Users";
-import { Button } from "./components/Button/Button";
-import { AddUserForm } from "./components/AddUserForm/AddUserForm";
-// import AddUserForm from "./components/AddUserForm/AddUserForm";
+import movies from "./data/movies.json";
+import { MoviesGallery } from "./components/MoviesGallery/MoviesGallery";
+import Modal from "./components/Modal/Modal";
+import { moviesMapper } from "./utils/mapper";
 
 class App extends Component {
-  // constructor() {
-  //   super();
-
-  //   this.state = {};
-
-  // }
-
   state = {
-    users: data,
-    isListShown: false,
-    isFormShown: false,
-    userToUpdate: null,
+    movies: moviesMapper(movies),
+    currentPoster: null,
   };
 
-  showUsers = () => {
-    this.setState({ isListShown: true });
-  };
+  componentDidMount() {
+    const savedMovies = localStorage.getItem("movies");
+    if (savedMovies) {
+      this.setState({ movies: JSON.parse(savedMovies) });
+    }
+  }
 
-  showForm = () => {
-    this.setState({ isFormShown: true });
-  };
+  componentDidUpdate(_, prevState) {
+    const { movies } = this.state;
+    if (movies !== prevState.movies) {
+      localStorage.setItem("movies", JSON.stringify(movies));
+    }
+  }
 
-  closeForm = () => {
-    this.setState({ isFormShown: false });
-  };
-
-  deleteUser = (userId) => {
-    // this.setState((prevState) => {
-    //   return {
-    //     users: prevState.users.filter((user) => user.id !== userId),
-    //   };
-    // });
+  deleteMovie = (moviedId) => {
     this.setState((prevState) => ({
-      users: prevState.users.filter((user) => user.id !== userId),
+      movies: prevState.movies.filter(({ id }) => id !== moviedId),
     }));
   };
 
-  addUser = (data) => {
-    const newUser = { ...data, id: Date.now() };
-    this.setState((prevState) => ({
-      users: [...prevState.users, newUser],
-    }));
+  openModal = (poster) => {
+    this.setState({ currentPoster: poster });
   };
 
-  updateUser = (user) => {
-    this.setState((prevState) => {
-      const index = prevState.users.findIndex(({ id }) => id === user.id);
-      const newUsers = [...prevState.users];
-      newUsers[index] = user;
-      return { users: newUsers, userToUpdate: null };
-    });
-  };
-
-  showUpdateForm = (userId) => {
-    const { users } = this.state;
-    const userToUpdate = users.find(({ id }) => id === userId);
-    this.setState({ userToUpdate });
+  closeModal = () => {
+    this.setState({ currentPoster: null });
   };
 
   render() {
-    const { isListShown, users, isFormShown, userToUpdate } = this.state;
+    const { movies, currentPoster } = this.state;
     return (
       <>
-        {isListShown ? (
-          <Section title="List of users">
-            <Users
-              users={users}
-              deleteUser={this.deleteUser}
-              updateUser={this.updateUser}
-              userToUpdate={userToUpdate}
-              showUpdateForm={this.showUpdateForm}
-            />
-            {isFormShown ? (
-              <AddUserForm addUser={this.addUser} closeForm={this.closeForm} />
-            ) : (
-              <Button
-                textContent="Add user"
-                type="button"
-                clickHandler={this.showForm}
-              />
-            )}
-          </Section>
-        ) : (
-          <Button
-            textContent="Show list of users"
-            type="button"
-            clickHandler={this.showUsers}
-          />
+        <MoviesGallery
+          movies={movies}
+          deleteMovie={this.deleteMovie}
+          openModal={this.openModal}
+        />
+        {currentPoster && (
+          <Modal currentPoster={currentPoster} closeModal={this.closeModal} />
         )}
       </>
     );
