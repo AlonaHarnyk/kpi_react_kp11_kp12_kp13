@@ -1,3 +1,5 @@
+import styles from './Modal.module.css'
+
 import { Component } from "react";
 
 class Modal extends Component {
@@ -24,7 +26,7 @@ class Modal extends Component {
     return (
       <div>
         <div>
-          <button onClick={closeModal}>Close</button>
+          <button onClick={closeModal} className={styles.text}>Close</button>
           <img alt={alt} src={`https://image.tmdb.org/t/p/w500${src}`} />
         </div>
       </div>
